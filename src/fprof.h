@@ -7,6 +7,7 @@ extern "C" {
 
 // fprof.h
 // header file for function profiler
+// gcc -finstrument-functions -export-dynamic -ggdb -Wl,--export-dynamic finstrument.c -o finstrument -ldl
 
 #define _GNU_SOURCE
 //#include <stdio.h>
