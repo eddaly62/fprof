@@ -10,12 +10,6 @@ extern "C" {
 // gcc -finstrument-functions -export-dynamic -ggdb -Wl,--export-dynamic finstrument.c -o finstrument -ldl
 
 #define _GNU_SOURCE
-//#include <stdio.h>
-//#include <string.h>
-//#include <sys/time.h>
-//#include <unistd.h>
-//#include <stdlib.h>
-//#include <signal.h>
 #include <dlfcn.h>
 
 #define MAX_LEN	64

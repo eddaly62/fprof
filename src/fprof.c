@@ -31,19 +31,22 @@ unsigned long fprof_get_time_diff(unsigned long start, unsigned long end) {
 
 // print stats
 void fprof_print_stats(void) {
+
 	int i;
+
 	for (i = 0; i < pstats.stats_count; i++) {
 		dladdr(pstats.stats[i].this_fn, &info);
 		strcpy(pstats.stats[i].sfile, info.dli_fname);
 
 		printf("file(%s), this_fn(%p, %s), count(%lu), min time(%lu), max time(%lu)\n",
-		 pstats.stats[i].sfile, pstats.stats[i].this_fn, info.dli_sname,
-		 pstats.stats[i].call_count, pstats.stats[i].time_min, pstats.stats[i].time_max);
+		pstats.stats[i].sfile, pstats.stats[i].this_fn, info.dli_sname,
+		pstats.stats[i].call_count, pstats.stats[i].time_min, pstats.stats[i].time_max);
 	}
 }
 
 // print results in csv file format
 void fprof_stats_csv(char *pathname) {
+
 	int i;
 	FILE *fp;
 
@@ -68,6 +71,7 @@ void fprof_stats_csv(char *pathname) {
 
 // print results in markdown file format
 void fprof_stats_md(char *pathname) {
+
 	int i;
 	FILE *fp;
 
