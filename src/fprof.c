@@ -74,10 +74,20 @@ void fprof_stats_md(char *pathname) {
 			fprintf(fp, "|------|--------------|----------|-------|---------------|---------------|-----------|-------|----------|\n");
 		}
 		else {
-			fprintf(fp, "| %s | %p | %s | %lu | %lu | %lu | %d | %d | %s |\n",
-			pstats.stats[i].sfile, pstats.stats[i].this_fn, info.dli_sname,
-			pstats.stats[i].call_count, pstats.stats[i].time_min, pstats.stats[i].time_max,
-			pstats.stats[i].error_count, pstats.stats[i].serror_num, pstats.stats[i].serror_desc);
+			if (pstats.stats[i].error_count > 0) {
+				fprintf(fp, "| %s | %p | %s | %lu | %lu | %lu | %s%d%s | %s%d%s | %s%s%s |\n",
+				pstats.stats[i].sfile, pstats.stats[i].this_fn, info.dli_sname,
+				pstats.stats[i].call_count, pstats.stats[i].time_min, pstats.stats[i].time_max,
+				PRE_HTML_RED, pstats.stats[i].error_count, POST_HTML_RED,
+				PRE_HTML_RED, pstats.stats[i].serror_num, POST_HTML_RED,
+				PRE_HTML_RED, pstats.stats[i].serror_desc, POST_HTML_RED);
+			}
+			else {
+				fprintf(fp, "| %s | %p | %s | %lu | %lu | %lu | %d | %d | %s |\n",
+				pstats.stats[i].sfile, pstats.stats[i].this_fn, info.dli_sname,
+				pstats.stats[i].call_count, pstats.stats[i].time_min, pstats.stats[i].time_max,
+				pstats.stats[i].error_count, pstats.stats[i].serror_num, pstats.stats[i].serror_desc);
+			}
 		}
 	}
 

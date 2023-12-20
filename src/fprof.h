@@ -28,6 +28,9 @@ extern "C" {
 #define MAX_LEN	512
 #define MAX_FUNCTIONS	4096
 
+#define PRE_HTML_RED "<span style=\"color:red;\">"
+#define POST_HTML_RED "</span>"
+
 // function stats
 typedef struct st {
 	void *this_fn;
