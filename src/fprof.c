@@ -1,5 +1,5 @@
 // fprof.c
-// function profiler source code
+// function profiler
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -75,12 +75,19 @@ void fprof_stats_md(char *pathname) {
 		}
 		else {
 			if (pstats.stats[i].error_count > 0) {
+#if USE_HTML_IN_OUTPUT_FILE
 				fprintf(fp, "| %s | %p | %s | %lu | %lu | %lu | %s%d%s | %s%d%s | %s%s%s |\n",
 				pstats.stats[i].sfile, pstats.stats[i].this_fn, info.dli_sname,
 				pstats.stats[i].call_count, pstats.stats[i].time_min, pstats.stats[i].time_max,
 				PRE_HTML_RED, pstats.stats[i].error_count, POST_HTML_RED,
 				PRE_HTML_RED, pstats.stats[i].serror_num, POST_HTML_RED,
 				PRE_HTML_RED, pstats.stats[i].serror_desc, POST_HTML_RED);
+#else
+				fprintf(fp, "| %s | %p | %s | %lu | %lu | %lu | %d | %d | %s |\n",
+				pstats.stats[i].sfile, pstats.stats[i].this_fn, info.dli_sname,
+				pstats.stats[i].call_count, pstats.stats[i].time_min, pstats.stats[i].time_max,
+				pstats.stats[i].error_count, pstats.stats[i].serror_num, pstats.stats[i].serror_desc);
+#endif
 			}
 			else {
 				fprintf(fp, "| %s | %p | %s | %lu | %lu | %lu | %d | %d | %s |\n",
@@ -97,8 +104,8 @@ void fprof_stats_md(char *pathname) {
 // output status
 void fprof_send_status(void){
 
-	snprintf(pstats.file_md_name, MAX_LEN, "%s-%d.md", OUTPUT_MD_FILE, pstats.file_count);
 	snprintf(pstats.file_csv_name, MAX_LEN, "%s-%d.csv", OUTPUT_CSV_FILE, pstats.file_count);
+	snprintf(pstats.file_md_name, MAX_LEN, "%s-%d.md", OUTPUT_MD_FILE, pstats.file_count);
 	fprof_stats_csv(pstats.file_csv_name);
 	fprof_stats_md(pstats.file_md_name);
 }

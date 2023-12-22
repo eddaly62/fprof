@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 // fprof.h
-// header file for function profiler
+// header file for the function profiler
 
 // Steps
 // 1) add this file, fprof.h to every c file that you want analyzed
@@ -21,12 +21,19 @@ extern "C" {
 #include <dlfcn.h>
 
 // user settings
-#define OUTPUT_INTERVAL_SEC	(1*60*60)
-#define OUTPUT_CSV_FILE	"fprof"
-#define OUTPUT_MD_FILE	"fprof"
+#define OUTPUT_INTERVAL_MIN	10
+#define OUTPUT_CSV_FILE	"fprof"				// output csv file name
+#define OUTPUT_MD_FILE	"fprof"				// output md file name
+#define USE_HTML_IN_OUTPUT_FILE	1
 
+// user fuction to exclude from analysis
+int main(int argc, char *argv[]) __attribute__((no_instrument_function));
+// more can be added ...
+
+// setting that should not be changed
 #define MAX_LEN	512
-#define MAX_FUNCTIONS	4096
+#define MAX_FUNCTIONS	10240
+#define OUTPUT_INTERVAL_SEC	(OUTPUT_INTERVAL_MIN*60)		// report interval in seconds
 
 #define PRE_HTML_RED "<span style=\"color:red;\">"
 #define POST_HTML_RED "</span>"
@@ -57,13 +64,13 @@ typedef struct ps {
 	STATS stats[MAX_FUNCTIONS];
 } PSTATS;
 
-void __cyg_profile_func_enter(void *this_fn, void *call_site) __attribute__((no_instrument_function));
-void __cyg_profile_func_exit(void *this_fn, void *call_site) __attribute__((no_instrument_function));
+// pre-function hook
 void fprof_update_stats_start(void *this_fn, void *call_site) __attribute__((no_instrument_function));
-void fprof_update_stats_end(void *this_fn, void *call_site) __attribute__((no_instrument_function));
+void __cyg_profile_func_enter(void *this_fn, void *call_site) __attribute__((no_instrument_function));
 
-// prints status to stdout
-void fprof_print_stats(void) __attribute__((no_instrument_function));
+// post function hook
+void fprof_update_stats_end(void *this_fn, void *call_site) __attribute__((no_instrument_function));
+void __cyg_profile_func_exit(void *this_fn, void *call_site) __attribute__((no_instrument_function));
 
 // print results in csv file format
 void fprof_stats_csv(char *pathname) __attribute__((no_instrument_function));
@@ -71,17 +78,16 @@ void fprof_stats_csv(char *pathname) __attribute__((no_instrument_function));
 // print results in markdown file format
 void fprof_stats_md(char *pathname) __attribute__((no_instrument_function));
 
+// execution time functions
 unsigned long fprof_get_time(void) __attribute__((no_instrument_function));
 unsigned long fprof_get_time_diff(unsigned long start, unsigned long end) __attribute__((no_instrument_function));
-
-// todo remove?
-//int main(int argc, char *argv[]) __attribute__((no_instrument_function));
 
 // exit signal handler
 void fprof_sig_handler(int signum) __attribute__((no_instrument_function));
 
-// exit function
-void fprof_fini(void) __attribute__((no_instrument_function));
+// output/exit function
+void fprof_send_status(void) __attribute__((no_instrument_function));
+
 
 #ifdef __cplusplus
 }
