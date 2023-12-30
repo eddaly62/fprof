@@ -6,7 +6,7 @@
 SVER?=1.0
 RVER?=$(SVER).0
 
-OTHER_LIBS=-ldl
+OTHER_LIBS=-ldl -lrt
 
 CC=gcc
 SOFLAGS=-fPIC -shared

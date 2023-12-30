@@ -14,14 +14,15 @@ Review the following settings int fprof.h file, and make any changes
 | Setting | Default | Description |
 |---------|---------|-------------|
 | OUTPUT_INTERVAL_MIN | 10 | |
-| OUTPUT_CSV_FILE | "fprof" | output csv file name |
-| OUTPUT_MD_FILE | "fprof" | output md file name |
-| USE_HTML_IN_OUTPUT_FILE |	1 | 1 = use html in md file (colored text), 0 = no html in md file |
+| OUTPUT_CSV_FILE | "fprof" | output csv file name prefix |
+| OUTPUT_MD_FILE | "fprof" | output md file name prefix |
+| USE_HTML_IN_OUTPUT_FILE | 1 | 1 = use html in md file (colored text), 0 = no html in md file |
+| MAX_FUNCTIONS | 10240 | The maximum number of functions that can be processed |
 
 After making and changes to the header file, remember to rebuild the library and reinstall.
 
     make release
-    make install
+    sudo make install
 
 ## Building the fprof library
 
@@ -33,20 +34,20 @@ Steps:
 
 - To install the library
 
-        make install
+        sudo make install
 
 ## Using the fprof library
 
 Steps:
 
-- Add the fprof.h to every c file that you want analyzed
+- Add the fprof.h to every c file that you want analyzed. No need to modify any of your source code files.
 
         #define <fprof.h>
 
-- Add the following to the CFLAGS variable in your makefile.
+- Add the following to the CFLAGS (compiler options) variable in your makefile.
 
         -finstrument-functions -export-dynamic -Wl,--export-dynamic
 
-- Add the following to the LDFLAGS variable in your makefile.
+- Add the following to the LDFLAGS (linker options) variable in your makefile.
 
-        -ldl
+        -L/usr/local/lib -Wl,-R/usr/local/lib -lfprof -ldl
