@@ -17,22 +17,10 @@ extern "C" {
 // 3) add the following to the LDFLAGS variable in your makefile
 // -ldl
 
-//#define _POSIX_C_SOURCE 199309
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <limits.h>
-//#include <time.h>
-
-// user settings
-#define OUTPUT_1ST_INTERVAL_MIN	1
-#define OUTPUT_INTERVAL_MIN	1
-#define OUTPUT_CSV_FILE	"fprof"				// output csv file name
-#define OUTPUT_MD_FILE	"fprof"				// output md file name
-#define USE_HTML_IN_OUTPUT_FILE	1
-#define MAX_FUNCTIONS	10240
-
-// user fuction to exclude from analysis
-// more can be added here...
+#include "fprof_user.h"
 
 // setting that should not be changed
 #if MAX_FUNCTIONS > INT_MAX
@@ -73,16 +61,6 @@ typedef struct ps {
 	int stats_count;
 	STATS stats[MAX_FUNCTIONS];
 } PSTATS;
-
-#if 0
-// interval timer variables
-typedef struct it {
-    pthread_attr_t attr;
-    struct sigevent sig;
-    timer_t timerid;
-    struct itimerspec in, out;
-} INT_TIMER;
-#endif
 
 // pre-function hook
 void fprof_update_stats_start(void *this_fn, void *call_site) __attribute__((no_instrument_function));

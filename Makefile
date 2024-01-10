@@ -58,7 +58,7 @@ clean:
 install:
 	@echo "=== Installing lib$(BIN)"
 	install -d $(HDR_INST)
-	install src/fprof.h $(HDR_INST)
+	install src/fprof*.h $(HDR_INST)
 	install -d $(LIB_INST)
 	install $(LIB) $(LIB_INST)
 	ln -srf $(LIB_INST)/$(RNAME) $(LIB_INST)/$(SONAME)

@@ -23,7 +23,6 @@ typedef struct it {
 } INT_TIMER;
 
 // declare and initialize variables
-Dl_info info;
 PSTATS pstats = { .stats_count = 0, .file_count = 0 };
 
 INT_TIMER itmr = {
@@ -37,6 +36,7 @@ INT_TIMER itmr = {
 };
 
 pthread_mutex_t fprofmutex = PTHREAD_MUTEX_INITIALIZER;
+Dl_info info;
 
 // return time of day
 unsigned long fprof_get_time(void) {
@@ -69,6 +69,7 @@ void fprof_stats_csv(char *pathname) {
 
 		if (i == 0) {
 			fprintf(pstats.fp_csv, "file, function_ptr, function, count, min_time_usec, max_time_usec, err_count, errno, err_desc\n");
+
 		}
 		else {
 			fprintf(pstats.fp_csv, "%s, %p, %s, %lu, %lu, %lu, %d, %d, %s\n",
@@ -133,11 +134,8 @@ void fprof_stats_md(char *pathname) {
 	fclose(pstats.fp_md);
 }
 
-// output status
-void fprof_send_status(union sigval val) {
-
-	// service interval timer 1
-	if (val.sival_int == 1) {
+// output status helper function
+void fprof_output_stats(void) {
 
 		// generate file names
 		snprintf(pstats.file_csv_name, FPROF_MAX_LEN, "%s-%d-%d.csv", OUTPUT_CSV_FILE, (int)getpid(), pstats.file_count);
@@ -149,7 +147,19 @@ void fprof_send_status(union sigval val) {
 		fprof_stats_md(pstats.file_md_name);
 		pthread_mutex_unlock(&fprofmutex);
 
+}
+
+// output status
+void fprof_send_status(union sigval val) {
+
+	// service interval timer 1
+	if (val.sival_int == 1) {
+
+		fprof_output_stats();
+
+		#ifdef DEBUG
 		printf("fprof saving data to %s and %s with %d functions\n", pstats.file_csv_name, pstats.file_md_name, pstats.stats_count);
+		#endif
 
 		pstats.file_count++;
 	}
@@ -183,29 +193,32 @@ void fprof_update_stats_start(void *this_fn, void *call_site){
 	int i;
 
 	if (pstats.stats_count == 0) {
+
 		// start up
-		//signal(SIGINT, fprof_sig_handler);
-		//signal(SIGALRM, fprof_sig_handler);
-		//alarm(OUTPUT_INTERVAL_SEC);
-		//atexit(fprof_send_status);
+		atexit(fprof_output_stats);
 
 		// set up and start an interval timer to periodically output status
 		fprof_interval_timer(&itmr, fprof_send_status);
 
+		#ifdef DEBUG
 		printf("fprof starting up\n");
+		#endif
 	}
 
 	for (i = 0; i < MAX_FUNCTIONS; i++) {
 		if (this_fn == pstats.stats[i].this_fn) {
 			// match, already in table, just update the stuff that changed
+			pthread_mutex_lock(&fprofmutex);
 			pstats.stats[i].errno_start = errno;
 			pstats.stats[i].call_count++;
 			pstats.stats[i].time_start = fprof_get_time();
+			pthread_mutex_unlock(&fprofmutex);
 			return;
 		}
 	}
 
 	// not in table
+	pthread_mutex_lock(&fprofmutex);
 	i = pstats.stats_count;
 	pstats.stats[i].errno_start = errno;
 	pstats.stats[i].call_count = 1;
@@ -220,6 +233,7 @@ void fprof_update_stats_start(void *this_fn, void *call_site){
 	if (pstats.stats_count < MAX_FUNCTIONS) {
 		pstats.stats_count++;
 	}
+	pthread_mutex_unlock(&fprofmutex);
 	return;
 }
 
@@ -231,6 +245,8 @@ void fprof_update_stats_end(void *this_fn, void *call_site){
 
 	for (i = 0; i < MAX_FUNCTIONS; i++) {
 		if (this_fn == pstats.stats[i].this_fn) {
+
+			pthread_mutex_lock(&fprofmutex);
 
 			// match found in table
 			pstats.stats[i].time_end = fprof_get_time();
@@ -252,6 +268,8 @@ void fprof_update_stats_end(void *this_fn, void *call_site){
 				pstats.stats[i].serror_num = pstats.stats[i].errno_end;
 				snprintf(pstats.stats[i].serror_desc, FPROF_MAX_LEN, "%s", strerror(pstats.stats[i].errno_end));
 			}
+
+			pthread_mutex_unlock(&fprofmutex);
 
 			return;
 		}
